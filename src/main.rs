@@ -49,8 +49,9 @@ fn scan(root: &std::path::Path, state: &mut HashMap<String, u64>, seeding: bool)
             continue;
         }
         let (added, removed) = git::numstat(root, &f);
+        let hunks = git::hunk_scopes(root, &f);
         let colored = git::diff_colored(root, &f);
-        render::change_block(&f, added, removed, &colored);
+        render::change_block(&f, added, removed, &colored, &hunks);
     }
 }
 

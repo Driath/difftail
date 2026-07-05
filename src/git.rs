@@ -98,3 +98,27 @@ pub fn hash_str(s: &str) -> u64 {
     s.hash(&mut h);
     h.finish()
 }
+
+/// Accurate per-hunk enclosing scope, taken from a zero-context (`-U0`) diff. With the
+/// default context git anchors the hunk header on the hunk's first *context* line, which
+/// drifts the reported definition up to an outer scope (e.g. the struct instead of the
+/// method). At `-U0` each hunk anchors on the changed line itself, so git reports the
+/// tightest enclosing definition. Returns (new-file start line, enclosing definition).
+pub fn hunk_scopes(root: &Path, file: &str) -> Vec<(u32, String)> {
+    let d = run_diff(root, file, false, &["-U0"]);
+    let mut v = Vec::new();
+    for line in d.lines() {
+        if !line.starts_with("@@") {
+            continue;
+        }
+        let Some(plus) = line.split_whitespace().find(|w| w.starts_with('+')) else {
+            continue;
+        };
+        let Some(start) = plus[1..].split(',').next().and_then(|s| s.parse().ok()) else {
+            continue;
+        };
+        let ctx = line.splitn(3, "@@").nth(2).map(|s| s.trim().to_string()).unwrap_or_default();
+        v.push((start, ctx));
+    }
+    v
+}
