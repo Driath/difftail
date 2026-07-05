@@ -6,9 +6,12 @@
 //! baseline at launch, so only edits made *after* launch stream in — chronologically,
 //! oldest at the top, newest at the bottom, in the terminal's native scrollback.
 
+mod filter;
 mod git;
 mod render;
 mod scope;
+
+use filter::Filter;
 
 use clap::Parser;
 use notify_debouncer_mini::new_debouncer;
@@ -29,12 +32,23 @@ struct Args {
     /// Debounce window in milliseconds (coalesce bursts of writes).
     #[arg(long, default_value_t = 300)]
     debounce: u64,
+
+    /// Only show files matching this glob (repeatable). e.g. --include 'packages/api/**'
+    #[arg(long, value_name = "GLOB")]
+    include: Vec<String>,
+
+    /// Hide files matching this glob (repeatable). e.g. --exclude '*.lock'
+    #[arg(long, value_name = "GLOB")]
+    exclude: Vec<String>,
 }
 
 /// Diff every changed file; print a block only for files whose diff changed since
 /// last scan. `seeding` records the baseline silently (no output).
-fn scan(root: &std::path::Path, state: &mut HashMap<String, u64>, seeding: bool) {
+fn scan(root: &std::path::Path, filter: &Filter, state: &mut HashMap<String, u64>, seeding: bool) {
     for f in git::changed_files(root) {
+        if !filter.allows(&f) {
+            continue;
+        }
         let plain = git::diff_plain(root, &f);
         if plain.is_empty() {
             // File went back to clean — forget it so a later re-edit prints again.
@@ -79,9 +93,17 @@ fn main() {
         }
     };
 
+    let filter = match Filter::new(&args.include, &args.exclude) {
+        Ok(f) => f,
+        Err(e) => {
+            eprintln!("chrono-diff: {e}");
+            std::process::exit(2);
+        }
+    };
+
     // Seed the baseline: everything already dirty is recorded but NOT printed.
     let mut state: HashMap<String, u64> = HashMap::new();
-    scan(&root, &mut state, true);
+    scan(&root, &filter, &mut state, true);
 
     // Filesystem watch → debounce → notify the main thread to re-scan.
     let (tx, rx) = mpsc::channel();
@@ -106,6 +128,6 @@ fn main() {
     render::banner(&root);
 
     for _ in rx {
-        scan(&root, &mut state, false);
+        scan(&root, &filter, &mut state, false);
     }
 }
