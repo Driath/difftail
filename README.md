@@ -35,7 +35,7 @@ happened*. `chrono-diff` is that stream.
 cargo install --path .
 
 # Or, once published, via Homebrew (see Formula/chrono-diff.rb)
-brew install <you>/tap/chrono-diff
+brew install Driath/tap/chrono-diff
 ```
 
 ## Usage

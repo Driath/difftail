@@ -18,17 +18,17 @@ gh repo create chrono-diff --public --source . --push
 ```
 
 Tagging pushes an auto-generated source tarball at:
-`https://github.com/<you>/chrono-diff/archive/refs/tags/v0.1.0.tar.gz`
+`https://github.com/Driath/chrono-diff/archive/refs/tags/v0.1.0.tar.gz`
 
 ## 3. Wire the Homebrew formula
 
 Get the tarball sha256:
 
 ```sh
-curl -sL https://github.com/<you>/chrono-diff/archive/refs/tags/v0.1.0.tar.gz | shasum -a 256
+curl -sL https://github.com/Driath/chrono-diff/archive/refs/tags/v0.1.0.tar.gz | shasum -a 256
 ```
 
-Then in `Formula/chrono-diff.rb` replace `<you>`, the `url` tag, and
+Then in `Formula/chrono-diff.rb` replace `Driath`, the `url` tag, and
 `REPLACE_WITH_RELEASE_TARBALL_SHA256`.
 
 ## 4. Publish the tap
@@ -41,5 +41,5 @@ gh repo create homebrew-tap --public
 Users install with:
 
 ```sh
-brew install <you>/tap/chrono-diff
+brew install Driath/tap/chrono-diff
 ```
