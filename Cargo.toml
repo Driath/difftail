@@ -1,5 +1,5 @@
 [package]
-name = "chrono-diff"
+name = "difftail"
 version = "0.1.0"
 edition = "2021"
 description = "Real-time review feed — prints each repo change inline (time, file, language-aware scope, diff) as agents edit."

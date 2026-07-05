@@ -1,4 +1,4 @@
-//! chrono-diff — a real-time review feed for a git repo.
+//! difftail — a real-time review feed for a git repo.
 //!
 //! Watches the working tree and, on every change, prints an inline block per file:
 //! timestamp, path, ±line counts, the language-aware enclosing scope(s) the change
@@ -24,7 +24,7 @@ use std::sync::mpsc;
 use std::time::Duration;
 
 #[derive(Parser)]
-#[command(name = "chrono-diff", version, about)]
+#[command(name = "difftail", version, about)]
 struct Args {
     /// Repo (or subdir) to watch. Defaults to the current directory.
     #[arg(default_value = ".")]
@@ -96,7 +96,7 @@ fn main() {
     let root = match git::repo_root(&args.path) {
         Some(r) => r,
         None => {
-            eprintln!("chrono-diff: not a git repository: {}", args.path.display());
+            eprintln!("difftail: not a git repository: {}", args.path.display());
             std::process::exit(1);
         }
     };
@@ -104,7 +104,7 @@ fn main() {
     let filter = match Filter::new(&args.include, &args.exclude) {
         Ok(f) => f,
         Err(e) => {
-            eprintln!("chrono-diff: {e}");
+            eprintln!("difftail: {e}");
             std::process::exit(2);
         }
     };
@@ -126,12 +126,12 @@ fn main() {
             }
         }
     })
-    .expect("chrono-diff: failed to start file watcher");
+    .expect("difftail: failed to start file watcher");
 
     debouncer
         .watcher()
         .watch(&root, RecursiveMode::Recursive)
-        .expect("chrono-diff: failed to watch repo");
+        .expect("difftail: failed to watch repo");
 
     render::banner(&root);
 

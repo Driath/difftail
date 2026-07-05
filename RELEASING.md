@@ -1,4 +1,4 @@
-# Releasing chrono-diff
+# Releasing difftail
 
 ## 1. Cut a version
 
@@ -14,32 +14,32 @@ git push origin main --tags
 Create a GitHub repo (once) and push:
 
 ```sh
-gh repo create chrono-diff --public --source . --push
+gh repo create difftail --public --source . --push
 ```
 
 Tagging pushes an auto-generated source tarball at:
-`https://github.com/Driath/chrono-diff/archive/refs/tags/v0.1.0.tar.gz`
+`https://github.com/Driath/difftail/archive/refs/tags/v0.1.0.tar.gz`
 
 ## 3. Wire the Homebrew formula
 
 Get the tarball sha256:
 
 ```sh
-curl -sL https://github.com/Driath/chrono-diff/archive/refs/tags/v0.1.0.tar.gz | shasum -a 256
+curl -sL https://github.com/Driath/difftail/archive/refs/tags/v0.1.0.tar.gz | shasum -a 256
 ```
 
-Then in `Formula/chrono-diff.rb` replace `Driath`, the `url` tag, and
+Then in `Formula/difftail.rb` replace `Driath`, the `url` tag, and
 `REPLACE_WITH_RELEASE_TARBALL_SHA256`.
 
 ## 4. Publish the tap
 
 ```sh
 gh repo create homebrew-tap --public
-# copy Formula/chrono-diff.rb into it, commit, push
+# copy Formula/difftail.rb into it, commit, push
 ```
 
 Users install with:
 
 ```sh
-brew install Driath/tap/chrono-diff
+brew install Driath/tap/difftail
 ```

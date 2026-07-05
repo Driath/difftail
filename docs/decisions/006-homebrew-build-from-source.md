@@ -1,6 +1,6 @@
 # ADR-006 — Homebrew via a build-from-source formula
 
-**Decision.** The formula (`Formula/chrono-diff.rb`) runs `cargo install` against a release
+**Decision.** The formula (`Formula/difftail.rb`) runs `cargo install` against a release
 tarball rather than shipping prebuilt bottles.
 
 **Why.** Simpler to maintain for a single-author tap; no per-platform bottle build/CI.

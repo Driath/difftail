@@ -42,7 +42,7 @@ pub fn change_block(
 
 /// The launch banner (dim, so it doesn't compete with the change feed).
 pub fn banner(root: &std::path::Path) {
-    println!("{DIM}▶ chrono-diff: {} — review feed, Ctrl-C to stop{RESET}", root.display());
+    println!("{DIM}▶ difftail: {} — review feed, Ctrl-C to stop{RESET}", root.display());
 }
 
 /// Strip the git plumbing from a colored diff, keeping only what a reviewer wants.

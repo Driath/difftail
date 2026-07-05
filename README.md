@@ -1,11 +1,11 @@
-# chrono-diff
+# difftail
 
 **A real-time review feed for a git repo.** Watch the working tree and, on every change,
 print an inline block — timestamp, file, ±line counts, the *language-aware enclosing
 definition* the change lands in, and the colored diff. Built for reviewing what coding
 agents (Claude Code, Codex, aider, …) do to your codebase *as it happens*.
 
-Not a full-screen TUI: `chrono-diff` prints to the normal terminal buffer, so the
+Not a full-screen TUI: `difftail` prints to the normal terminal buffer, so the
 **terminal's native scrollback is your history** — oldest change at the top, newest at
 the bottom.
 
@@ -26,7 +26,7 @@ Every mature terminal diff viewer (diffpane, hunk, lumen, …) is a full-screen 
 a *snapshot* of the current working tree, grouped by file. None of them give a
 **chronological, plain-printed stream** of changes over time — which is exactly what you
 want when several agents are editing and you want to *review the sequence of what
-happened*. `chrono-diff` is that stream.
+happened*. `difftail` is that stream.
 
 ## Install
 
@@ -34,18 +34,18 @@ happened*. `chrono-diff` is that stream.
 # From source (Rust toolchain required)
 cargo install --path .
 
-# Or, once published, via Homebrew (see Formula/chrono-diff.rb)
-brew install Driath/tap/chrono-diff
+# Or, once published, via Homebrew (see Formula/difftail.rb)
+brew install Driath/tap/difftail
 ```
 
 ## Usage
 
 ```sh
-chrono-diff                     # watch the current repo
-chrono-diff /path/to/repo       # watch another repo
-chrono-diff --exclude '*.lock'  # hide noise
-chrono-diff --include 'packages/api/**'   # focus a subtree
-chrono-diff --debounce 150      # snappier (default 300ms)
+difftail                     # watch the current repo
+difftail /path/to/repo       # watch another repo
+difftail --exclude '*.lock'  # hide noise
+difftail --include 'packages/api/**'   # focus a subtree
+difftail --debounce 150      # snappier (default 300ms)
 ```
 
 `Ctrl-C` to stop. The pre-existing diff is seeded as a **silent baseline** at launch, so
@@ -82,7 +82,7 @@ only edits made *after* launch stream in.
 ## Limitations
 
 - **Attribution is a heuristic.** The OS provides no writer PID with a filesystem event,
-  and privileged tracing (fs_usage/DTrace) is too heavy to require. `chrono-diff` detects
+  and privileged tracing (fs_usage/DTrace) is too heavy to require. `difftail` detects
   *running agent processes whose cwd is inside the repo* and only names one when
   unambiguous. It's a proxy for "who's working here", not proof a given file was written
   by that process.

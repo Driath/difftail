@@ -9,7 +9,7 @@ captures the scrollback.
 
 **Why.** Printing inline makes the terminal's **native scrollback the chronological history** —
 oldest change at the top, newest at the bottom. This is the core product decision and the
-reason chrono-diff exists as its own tool.
+reason difftail exists as its own tool.
 
 **Consequence.** No live-updating UI; the feed only grows. Rendering is plain `write_all` in
 `render.rs`.

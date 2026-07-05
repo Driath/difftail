@@ -1,4 +1,4 @@
-# chrono-diff — verified source of truth
+# difftail — verified source of truth
 
 > Canonical reference. Every claim traced to a symbol in `src/`. When other docs disagree
 > with the code, **the code wins** — grep the symbol.
