@@ -9,6 +9,12 @@ license = "MIT"
 notify-debouncer-mini = "0.4"
 clap = { version = "4", features = ["derive"] }
 chrono = { version = "0.4", default-features = false, features = ["clock"] }
+tree-sitter = "0.26.10"
+tree-sitter-rust = "0.24.2"
+tree-sitter-typescript = "0.23.2"
+tree-sitter-javascript = "0.25.0"
+tree-sitter-python = "0.25.0"
+tree-sitter-go = "0.25.0"
 
 [profile.release]
 lto = true

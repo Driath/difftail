@@ -8,6 +8,7 @@
 
 mod git;
 mod render;
+mod scope;
 
 use clap::Parser;
 use notify_debouncer_mini::new_debouncer;
@@ -49,9 +50,21 @@ fn scan(root: &std::path::Path, state: &mut HashMap<String, u64>, seeding: bool)
             continue;
         }
         let (added, removed) = git::numstat(root, &f);
+        // Precise per-hunk scope: tree-sitter breadcrumb from the current file source,
+        // falling back to git's -U0 hunk context for unsupported languages.
         let hunks = git::hunk_scopes(root, &f);
+        let source = std::fs::read_to_string(root.join(&f)).unwrap_or_default();
+        let resolved: Vec<(u32, String)> = hunks
+            .iter()
+            .map(|(line, ctx)| {
+                let label = scope::breadcrumb(std::path::Path::new(&f), &source, *line)
+                    .filter(|s| !s.is_empty())
+                    .unwrap_or_else(|| ctx.clone());
+                (*line, label)
+            })
+            .collect();
         let colored = git::diff_colored(root, &f);
-        render::change_block(&f, added, removed, &colored, &hunks);
+        render::change_block(&f, added, removed, &colored, &resolved);
     }
 }
 
