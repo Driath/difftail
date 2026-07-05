@@ -8,8 +8,9 @@ const CYAN_BOLD: &str = "\x1b[1;36m";
 const DIM: &str = "\x1b[2m";
 const RESET: &str = "\x1b[0m";
 
-/// One change: `━━ HH:MM:SS  <file>  (−rm +add) ━━`, a scope breadcrumb, then the diff.
-pub fn change_block(path: &str, added: u32, removed: u32, scopes: &[String], colored_diff: &str) {
+/// One change: `━━ HH:MM:SS  <file>  (−rm +add) ━━`, then the diff with the enclosing
+/// scope printed inline before each hunk that lands in a new definition.
+pub fn change_block(path: &str, added: u32, removed: u32, colored_diff: &str) {
     let ts = Local::now().format("%H:%M:%S");
     let mut out = String::new();
 
@@ -17,22 +18,6 @@ pub fn change_block(path: &str, added: u32, removed: u32, scopes: &[String], col
     out.push_str(&format!(
         "{CYAN_BOLD}━━ {ts}  {path}  {DIM}(−{removed} +{added}){RESET}{CYAN_BOLD} ━━{RESET}\n"
     ));
-
-    if scopes.is_empty() {
-        out.push_str(&format!("{DIM}   ↳ (top level){RESET}\n"));
-    } else {
-        // A few enclosing definitions the change lands in — the review breadcrumb.
-        let shown: Vec<&str> = scopes.iter().take(4).map(String::as_str).collect();
-        let more = scopes.len().saturating_sub(shown.len());
-        let mut line = format!("{DIM}   ↳ {}", shown.join("  ·  "));
-        if more > 0 {
-            line.push_str(&format!("  (+{more} more)"));
-        }
-        line.push_str(RESET);
-        out.push_str(&line);
-        out.push('\n');
-    }
-
     out.push_str(&clean_diff(colored_diff));
 
     let stdout = std::io::stdout();
@@ -46,15 +31,17 @@ pub fn banner(root: &std::path::Path) {
     println!("{DIM}▶ chrono-diff: {} — review feed, Ctrl-C to stop{RESET}", root.display());
 }
 
-/// Strip the git plumbing from a colored diff, keeping only what a reviewer wants:
-/// the changed lines. Drops the whole extended header (`diff --git`, `index`,
-/// `--- a/…`, `+++ b/…`, mode/rename lines) — the file is already in our own header —
-/// and collapses each `@@ -a,b +c,d @@ ctx` hunk header to a tidy dim `@ <line>` marker
-/// (the scope already lives in the breadcrumb above).
+/// Strip the git plumbing from a colored diff, keeping only what a reviewer wants.
+/// Drops the whole extended header (`diff --git`, `index`, `--- a/…`, `+++ b/…`,
+/// mode/rename lines) — the file is already in our block header. Replaces each
+/// `@@ -a,b +c,d @@ ctx` hunk header with a dim `↳ ctx` scope line (the language-aware
+/// enclosing definition), so every hunk shows *which* definition it edits. No line
+/// numbers (noise). Consecutive hunks in the same definition print the scope once.
 fn clean_diff(colored: &str) -> String {
     let mut out = String::new();
     // Everything between `diff --git` and the first `@@` of a file is header plumbing.
     let mut in_header = false;
+    let mut last_scope: Option<String> = None;
 
     for line in colored.lines() {
         let plain = strip_ansi(line);
@@ -64,9 +51,13 @@ fn clean_diff(colored: &str) -> String {
         }
         if plain.starts_with("@@") {
             in_header = false;
-            if let Some(start) = hunk_new_start(&plain) {
-                out.push_str(&format!("{DIM}   @ {start}{RESET}\n"));
+            let ctx = hunk_scope(&plain);
+            // Only surface a scope line when there's a real enclosing definition;
+            // a top-level hunk (empty ctx) prints nothing. Dedupe consecutive hunks.
+            if !ctx.is_empty() && last_scope.as_deref() != Some(ctx.as_str()) {
+                out.push_str(&format!("{DIM}   ↳ {ctx}{RESET}\n"));
             }
+            last_scope = (!ctx.is_empty()).then_some(ctx);
             continue;
         }
         if in_header {
@@ -98,8 +89,7 @@ fn strip_ansi(s: &str) -> String {
     out
 }
 
-/// From a `@@ -a,b +c,d @@ …` header, the new-file start line `c`.
-fn hunk_new_start(hunk: &str) -> Option<u32> {
-    let plus = hunk.split_whitespace().find(|w| w.starts_with('+'))?;
-    plus[1..].split(',').next()?.parse().ok()
+/// The language-aware enclosing definition git prints after the second `@@`.
+fn hunk_scope(hunk: &str) -> String {
+    hunk.splitn(3, "@@").nth(2).map(|s| s.trim().to_string()).unwrap_or_default()
 }

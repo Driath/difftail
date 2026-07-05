@@ -98,24 +98,3 @@ pub fn hash_str(s: &str) -> u64 {
     s.hash(&mut h);
     h.finish()
 }
-
-/// Language-aware enclosing scopes touched by a diff, parsed from git's hunk headers.
-/// git emits `@@ -a,b +c,d @@ <enclosing definition>` using per-language xfuncname
-/// patterns (functions, classes, structs...). We surface that as the review breadcrumb.
-/// `plain` must be an uncolored diff.
-pub fn scopes(plain: &str) -> Vec<String> {
-    let mut out: Vec<String> = Vec::new();
-    for line in plain.lines() {
-        if !line.starts_with("@@") {
-            continue;
-        }
-        // Split off everything after the second "@@": that trailing text is the scope.
-        if let Some(rest) = line.splitn(3, "@@").nth(2) {
-            let ctx = rest.trim();
-            if !ctx.is_empty() && !out.iter().any(|s| s == ctx) {
-                out.push(ctx.to_string());
-            }
-        }
-    }
-    out
-}
