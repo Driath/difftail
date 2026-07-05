@@ -17,13 +17,20 @@ pub fn change_block(
     removed: u32,
     colored_diff: &str,
     hunks: &[(u32, String)],
+    agent: Option<&str>,
 ) {
     let ts = Local::now().format("%H:%M:%S");
     let mut out = String::new();
 
+    // Optional attribution tag, e.g. ` · codex·1234`.
+    let tag = match agent {
+        Some(a) => format!("{DIM} · {a}{RESET}"),
+        None => String::new(),
+    };
+
     out.push('\n');
     out.push_str(&format!(
-        "{CYAN_BOLD}━━ {ts}  {path}  {DIM}(−{removed} +{added}){RESET}{CYAN_BOLD} ━━{RESET}\n"
+        "{CYAN_BOLD}━━ {ts}  {path}  {DIM}(−{removed} +{added}){RESET}{tag}{CYAN_BOLD} ━━{RESET}\n"
     ));
     out.push_str(&clean_diff(colored_diff, hunks));
 

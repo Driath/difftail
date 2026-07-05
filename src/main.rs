@@ -6,6 +6,7 @@
 //! baseline at launch, so only edits made *after* launch stream in — chronologically,
 //! oldest at the top, newest at the bottom, in the terminal's native scrollback.
 
+mod agents;
 mod filter;
 mod git;
 mod render;
@@ -45,6 +46,13 @@ struct Args {
 /// Diff every changed file; print a block only for files whose diff changed since
 /// last scan. `seeding` records the baseline silently (no output).
 fn scan(root: &std::path::Path, filter: &Filter, state: &mut HashMap<String, u64>, seeding: bool) {
+    // Repo-level attribution, computed once per scan tick (skipped while seeding).
+    let agent = if seeding {
+        None
+    } else {
+        agents::label(&agents::detect(root))
+    };
+
     for f in git::changed_files(root) {
         if !filter.allows(&f) {
             continue;
@@ -78,7 +86,7 @@ fn scan(root: &std::path::Path, filter: &Filter, state: &mut HashMap<String, u64
             })
             .collect();
         let colored = git::diff_colored(root, &f);
-        render::change_block(&f, added, removed, &colored, &resolved);
+        render::change_block(&f, added, removed, &colored, &resolved, agent.as_deref());
     }
 }
 
