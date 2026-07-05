@@ -20,6 +20,6 @@
   parse each file once per tick and resolve all its hunks from one tree.
 - **Packaging** — publish the GitHub repo + tap, prebuilt Homebrew bottles, a demo GIF.
 
-## Known limitations (see decisions.md)
+## Known limitations (see docs/decisions/)
 - Attribution is a cwd+cmdline heuristic, not proof of authorship.
 - Non-tree-sitter languages fall back to git's `-U0` scope (top-level accurate, not nested).

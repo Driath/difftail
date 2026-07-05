@@ -49,4 +49,5 @@ Not a full-screen/alt-screen TUI. Built to review what coding agents do to a rep
 ## Non-negotiables
 - **Inline, never alt-screen** — native scrollback is the product.
 - **git is the diff source** — shell-out to `git` (perfect color + xfuncname), not a git lib.
-- **Attribution stays conservative** — only name an agent when unambiguous (see `decisions.md`).
+- **Attribution stays conservative** — only name an agent when unambiguous
+  (see `decisions/005-attribution-heuristic.md`).
